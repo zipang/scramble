@@ -9,17 +9,19 @@
 Class = require("lib.hump.class")
 Bomb = require("entities.Bomb")
 Ray = require("entities.Ray")
+Missile = require("entities.Missile")
 
 local anim8 = require("lib.anim8.anim8")
 local isKeyDown = love.keyboard.isDown
 
 Player = Class({})
 
-function Player:init(x, y)
+function Player:init(world, playerIndex, x, y)
 	local image = love.graphics.newImage("assets/img/starship-spritesheet-32x32.png")
 	local animSpriteSheet = anim8.newGrid(32, 32, image:getWidth(), image:getHeight())
 
 	self.image = image
+	self.playerIndex = playerIndex
 
 	-- position
 	self.x, self.y = x, y
@@ -35,28 +37,43 @@ function Player:init(x, y)
 		explode = anim8.newAnimation(animSpriteSheet("1-6", 2, "3-6", 3), 0.2, "pauseAtEnd"),
 	}
 	self.state = "still"
-end
 
-function Player:register(world)
 	-- register to the world (bump)
 	world:add(self, self:getCollisionRectangle())
 	self.world = world
-	return self
+	self.controller = world.controller
 end
 
 function Player:getCollisionRectangle()
 	return self.x + 3, self.y + 10, 24, 11
 end
 
-function Player:dropBomb()
-	return Bomb(self.world, self.x + 10, self.y + 22, 80)
-end
+local playerActions = {
+	dropBomb = function(player)
+		return Bomb(player.world, player.x + 10, player.y + 22, 80)
+	end,
+	fire = function(player)
+		return Ray(player.world, player.x + 20, player.y + 15, 100)
+	end,
+	launchMissile = function(player)
+		return Missile(player.world, player.x + 10, player.y + 22, 20, 100)
+	end,
+}
 
-function Player:fire()
-	return Ray(self.world, self.x + 20, self.y + 15, 100)
-end
+-- function Player:dropBomb()
+-- 	return Bomb(self.world, self.x + 10, self.y + 22, 80)
+-- end
+-- function Player:fire()
+-- 	return Ray(self.world, self.x + 20, self.y + 15, 100)
+-- end
+-- function Player:launchMissile()
+-- 	return Missile(self.world, self.x + 10, self.y + 22, 20, 100)
+-- end
 
 function Player:update(dt)
+	-- @TODO : extract the correct actions list depending on the playerIndex
+	local actions = self.controller:update(dt) -- Get the list of actions to apply
+
 	if isKeyDown("right") then
 		self.vx = 70
 		self.state = "cruise"
@@ -90,21 +107,33 @@ function Player:update(dt)
 	else
 		self.ax, self.ay = 0, 0
 	end
-	if isKeyDown("lctrl") then
-		self:dropBomb()
-	end
-	if isKeyDown("lshift") then
-		self:fire()
-	end
-	if isKeyDown("x") then
-		self.state = "explode"
-	end
 
+	-- if isKeyDown("lctrl") then
+	-- 	self:dropBomb()
+	-- end
+	-- if isKeyDown("lshift") then
+	-- 	self:fire()
+	-- end
+	-- if isKeyDown("lalt") then
+	-- 	self:launchMissile()
+	-- end
+	-- if isKeyDown("x") then
+	-- 	self.state = "explode"
+	-- end
+
+	-- Calcul new requested position by applying acceleration and velocity params
 	self.vx = self.vx + self.ax
 	self.vy = self.vy + self.ay
 	self.x = (self.x + dt * self.vx)
 	self.y = (self.y + dt * self.vy)
 
+	for _, action in pairs(actions) do
+		if playerActions[action] then
+			playerActions[action](self)
+		end
+	end
+
+	-- Update the running animation
 	self.states[self.state]:update(dt)
 end
 
