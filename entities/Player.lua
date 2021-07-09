@@ -7,6 +7,7 @@
     move on the horizontal axis
 ]]
 Class = require("lib.hump.class")
+Bomb = require("entities.Bomb")
 
 local anim8 = require("lib.anim8.anim8")
 local isKeyDown = love.keyboard.isDown
@@ -20,23 +21,34 @@ function Player:init(x, y)
 	self.image = image
 
 	-- position
-	self.x, self.y = x or 0, y or 0
+	self.x, self.y = x, y
 	-- velocity
 	self.vx, self.vy = 0, 0
 	-- acceleration
 	self.ax, self.ay = 0, 0
 
 	self.states = {
-		still = anim8.newAnimation(animSpriteSheet(1, 1), 1000),
+		still = anim8.newAnimation(animSpriteSheet(1, 1, 6, 1), 0.6),
 		cruise = anim8.newAnimation(animSpriteSheet("2-6", 1), 0.3),
 		warp = anim8.newAnimation(animSpriteSheet("4-6", 1), 0.1),
 		explode = anim8.newAnimation(animSpriteSheet("1-6", 2, "3-6", 3), 0.2, "pauseAtEnd"),
 	}
-	self.state = "cruise"
+	self.state = "still"
+end
+
+function Player:register(world)
+	-- register to the world (bump)
+	world:add(self, self:getCollisionRectangle())
+	self.world = world
+	return self
 end
 
 function Player:getCollisionRectangle()
 	return self.x + 3, self.y + 10, 24, 11
+end
+
+function Player:dropBomb()
+	return Bomb(self.world, self.x + 10, self.y + 22, 80)
 end
 
 function Player:update(dt)
@@ -48,6 +60,7 @@ function Player:update(dt)
 		self.state = "still"
 	else
 		self.vx = 0
+		self.state = "still"
 	end
 	if isKeyDown("up") then
 		self.vy = -70
@@ -71,6 +84,9 @@ function Player:update(dt)
 		end
 	else
 		self.ax, self.ay = 0, 0
+	end
+	if isKeyDown("lctrl") then
+		self:dropBomb()
 	end
 	if isKeyDown("x") then
 		self.state = "explode"
