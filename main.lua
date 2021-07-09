@@ -8,16 +8,9 @@ Class = require("lib.hump.class")
 -- https://github.com/vrld/hump/blob/master/class.lua
 local aspect = require("lib.aspect")
 
--- the world keeper :
--- register entities, check for collisions, bumps
--- https://github.com/kikito/bump.lua
-local bump = require("lib.bump.bump")
-
 local ScrollingBackground = require("entities.ScrollingBackground")
 local Player = require("entities.Player")
 local Fuel = require("entities.Fuel")
-
-DEBUG = true
 
 -- Setup the initial window size
 WINDOW_WIDTH = 1280
@@ -36,25 +29,17 @@ function love.load()
 	-- Do not apply blur on resizing
 	love.graphics.setDefaultFilter("nearest", "nearest")
 
-	-- Define the world
-	world = bump.newWorld(16)
-
 	-- Define entities
 	skyBg = ScrollingBackground("background-galaxy", -10, SCREEN_WIDTH, SCREEN_HEIGHT)
 	starsBg = ScrollingBackground("background-stars", -20, SCREEN_WIDTH, SCREEN_HEIGHT)
-	player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2):register(world)
+	player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 end
 
 function love.update(dt)
 	aspect.update()
 	skyBg:update(dt)
 	starsBg:update(dt)
-	-- player:update(dt)
-
-	local entities = world:getItems()
-	for i = 1, #entities do
-		entities[i]:update(dt)
-	end
+	player:update(dt)
 end
 
 function love.keypressed(key)
@@ -68,17 +53,7 @@ function love.draw()
 
 	skyBg:draw()
 	starsBg:draw()
-	-- player:draw()
-
-	local entities = world:getItems()
-	for i = 1, #entities do
-		entities[i]:draw()
-	end
-
-	if DEBUG then
-		love.graphics.setColor(255, 255, 255)
-		love.graphics.print("FPS: " .. tostring(love.timer.getFPS()) .. ", entities: " .. #entities, 375, 260)
-	end
+	player:draw()
 
 	aspect.stop()
 end
