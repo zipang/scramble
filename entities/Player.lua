@@ -8,6 +8,7 @@
 ]]
 Class = require("lib.hump.class")
 Bomb = require("entities.Bomb")
+Ray = require("entities.Ray")
 
 local anim8 = require("lib.anim8.anim8")
 local isKeyDown = love.keyboard.isDown
@@ -51,6 +52,10 @@ function Player:dropBomb()
 	return Bomb(self.world, self.x + 10, self.y + 22, 80)
 end
 
+function Player:fire()
+	return Ray(self.world, self.x + 20, self.y + 15, 100)
+end
+
 function Player:update(dt)
 	if isKeyDown("right") then
 		self.vx = 70
@@ -87,6 +92,9 @@ function Player:update(dt)
 	end
 	if isKeyDown("lctrl") then
 		self:dropBomb()
+	end
+	if isKeyDown("lshift") then
+		self:fire()
 	end
 	if isKeyDown("x") then
 		self.state = "explode"
