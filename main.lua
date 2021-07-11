@@ -1,6 +1,5 @@
 -- the "Class" library from Hump
---
--- https://github.com/vrld/hump
+-- https://hump.readthedocs.io/en/latest/class.html
 Class = require("lib.hump.class")
 
 -- the virtualization library
@@ -12,6 +11,8 @@ local aspect = require("lib.aspect")
 -- register entities, check for collisions, bumps
 -- https://github.com/kikito/bump.lua
 local bump = require("lib.bump.bump")
+
+local Controller = require("lib.Controller")
 
 local ScrollingBackground = require("entities.ScrollingBackground")
 local Player = require("entities.Player")
@@ -28,7 +29,29 @@ SCREEN_WIDTH = 512 -- 32 x 16
 SCREEN_HEIGHT = 288 -- 18 x 16
 aspect.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-local world, skyBg, starsBg, player
+--
+PLAYER1_MAPPINGS = {
+	keyboard = {
+		lctrl = "fire",
+		lshift = "launchMissile",
+		lalt = "dropBomb",
+	},
+	gamepad = {
+		b = "fire",
+		a = "dropBomb",
+		x = "launchMissile",
+	},
+}
+PLAYER2_MAPPINGS = {
+	keyboard = {},
+	gamepad = {
+		b = "fire",
+		a = "dropBomb",
+		x = "launchMissile",
+	},
+}
+
+local world, controller, skyBg, starsBg, player
 
 function love.load()
 	love.window.setTitle("Scramble")
@@ -38,19 +61,25 @@ function love.load()
 
 	-- Define the world
 	world = bump.newWorld(16)
+	-- and its controller
+	controller = Controller(PLAYER1_MAPPINGS, PLAYER2_MAPPINGS)
+	world.controller = controller
 
 	-- Define entities
 	skyBg = ScrollingBackground("background-galaxy", -10, SCREEN_WIDTH, SCREEN_HEIGHT)
 	starsBg = ScrollingBackground("background-stars", -20, SCREEN_WIDTH, SCREEN_HEIGHT)
-	player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2):register(world)
+
+	player = Player(world, 1, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3) -- GET READY PLAYER #1
 end
 
 function love.update(dt)
 	aspect.update()
+
+	-- static entities
 	skyBg:update(dt)
 	starsBg:update(dt)
-	-- player:update(dt)
 
+	-- dynamic entities that are registered on the world
 	local entities = world:getItems()
 	for i = 1, #entities do
 		entities[i]:update(dt)
@@ -60,7 +89,13 @@ end
 function love.keypressed(key)
 	if key == "escape" then
 		love.event.quit()
+	else
+		controller:onKeypressed(key)
 	end
+end
+
+function love.gamepadpressed(joystick, button)
+	controller:onGamepadpressed(joystick, button)
 end
 
 function love.draw()
@@ -68,7 +103,6 @@ function love.draw()
 
 	skyBg:draw()
 	starsBg:draw()
-	-- player:draw()
 
 	local entities = world:getItems()
 	for i = 1, #entities do
@@ -78,7 +112,11 @@ function love.draw()
 	if DEBUG then
 		love.graphics.setColor(255, 255, 255)
 		love.graphics.print("FPS: " .. tostring(love.timer.getFPS()) .. ", entities: " .. #entities, 375, 260)
+
+		-- love.graphics.print(controller:debug(1), 40, 260)
 	end
+
+	controller:reset() -- raz every actions detections
 
 	aspect.stop()
 end
