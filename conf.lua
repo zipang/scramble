@@ -1,7 +1,7 @@
 function love.conf(t)
 	t.identity = "scramble" -- The name of the save directory (string)
 	t.version = "11.0" -- The LÖVE version this game was made for (string)
-	t.console = false -- Attach a console (boolean, Windows only)
+	t.console = true -- Attach a console (boolean, Windows only)
 
 	t.window.title = "Scramble" -- The window title (string)
 	t.window.icon = "assets/img/scramble-icon.png" -- Filepath to an image to use as the window's icon (string)
