@@ -50,7 +50,7 @@ end
 
 local playerActions = {
 	dropBomb = function(player)
-		return Bomb(player.world, player.x + 10, player.y + 22, 80)
+		return Bomb(player.world, player.x + 15, player.y + 20, 80)
 	end,
 	fire = function(player)
 		return Ray(player.world, player.x + 20, player.y + 15, 100)
