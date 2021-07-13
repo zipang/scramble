@@ -12,9 +12,32 @@ Ray = require("entities.Ray")
 Missile = require("entities.Missile")
 
 local anim8 = require("lib.anim8.anim8")
-local isKeyDown = love.keyboard.isDown
 
 Player = Class({})
+
+local GAMEPAD_MAPPING = {
+	_dpup = "up", -- when the button is pressed
+	_dpdown = "down",
+	_dpleft = "left",
+	_dpright = "right",
+	b = "fire",
+	a = "dropBomb",
+	x = "launchMissile",
+}
+
+--
+Player.PLAYER1_MAPPINGS = {
+	keyboard = {
+		lctrl = "fire",
+		lshift = "launchMissile",
+		lalt = "dropBomb",
+	},
+	gamepad = GAMEPAD_MAPPING,
+}
+Player.PLAYER2_MAPPINGS = {
+	keyboard = {},
+	gamepad = GAMEPAD_MAPPING,
+}
 
 function Player:init(world, playerIndex, x, y)
 	local image = love.graphics.newImage("assets/img/starship-spritesheet-32x32.png")
@@ -71,27 +94,27 @@ local playerActions = {
 -- end
 
 function Player:update(dt)
-	-- @TODO : extract the correct actions list depending on the playerIndex
-	local actions = self.controller:update(dt) -- Get the list of actions to apply
+	-- Get the list of actions to apply for our current player
+	local actions = self.controller:update(dt)[self.playerIndex]
 
-	if isKeyDown("right") then
+	if actions.right then
 		self.vx = 70
 		self.state = "cruise"
-	elseif isKeyDown("left") then
+	elseif actions.left then
 		self.vx = -70
 		self.state = "still"
 	else
 		self.vx = 0
 		self.state = "still"
 	end
-	if isKeyDown("up") then
+	if actions.up then
 		self.vy = -70
-	elseif isKeyDown("down") then
+	elseif actions.down then
 		self.vy = 70
 	else
 		self.vy = 0
 	end
-	if isKeyDown("space") then
+	if actions.space then
 		self.state = "warp"
 		-- determine the acceleration direction
 		if self.vx > 0 then
@@ -108,16 +131,16 @@ function Player:update(dt)
 		self.ax, self.ay = 0, 0
 	end
 
-	-- if isKeyDown("lctrl") then
+	-- if actions.lctrl then
 	-- 	self:dropBomb()
 	-- end
-	-- if isKeyDown("lshift") then
+	-- if actions.lshift then
 	-- 	self:fire()
 	-- end
-	-- if isKeyDown("lalt") then
+	-- if actions.lalt then
 	-- 	self:launchMissile()
 	-- end
-	-- if isKeyDown("x") then
+	-- if actions.x then
 	-- 	self.state = "explode"
 	-- end
 
