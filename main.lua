@@ -29,29 +29,7 @@ SCREEN_WIDTH = 512 -- 32 x 16
 SCREEN_HEIGHT = 288 -- 18 x 16
 aspect.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
 
---
-PLAYER1_MAPPINGS = {
-	keyboard = {
-		lctrl = "fire",
-		lshift = "launchMissile",
-		lalt = "dropBomb",
-	},
-	gamepad = {
-		b = "fire",
-		a = "dropBomb",
-		x = "launchMissile",
-	},
-}
-PLAYER2_MAPPINGS = {
-	keyboard = {},
-	gamepad = {
-		b = "fire",
-		a = "dropBomb",
-		x = "launchMissile",
-	},
-}
-
-local world, controller, skyBg, starsBg, player
+local world, controller, skyBg, starsBg
 
 function love.load()
 	love.window.setTitle("Scramble")
@@ -61,15 +39,20 @@ function love.load()
 
 	-- Define the world
 	world = bump.newWorld(16)
+
 	-- and its controller
-	controller = Controller(PLAYER1_MAPPINGS, PLAYER2_MAPPINGS)
+	controller = Controller(Player.PLAYER1_MAPPINGS, Player.PLAYER2_MAPPINGS)
 	world.controller = controller
 
 	-- Define entities
 	skyBg = ScrollingBackground("background-galaxy", -10, SCREEN_WIDTH, SCREEN_HEIGHT)
 	starsBg = ScrollingBackground("background-stars", -20, SCREEN_WIDTH, SCREEN_HEIGHT)
 
-	player = Player(world, 1, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3) -- GET READY PLAYER #1
+	-- Define the players positions
+	Player(world, 1, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4 - 20) -- GET READY PLAYER #1
+	if controller:hasGamepad(2) then
+		Player(world, 2, SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4 - 20) -- GET READY PLAYER #2
+	end
 end
 
 function love.update(dt)
@@ -94,10 +77,6 @@ function love.keypressed(key)
 	end
 end
 
-function love.gamepadpressed(joystick, button)
-	controller:onGamepadpressed(joystick, button)
-end
-
 function love.draw()
 	aspect.start()
 
@@ -110,10 +89,7 @@ function love.draw()
 	end
 
 	if DEBUG then
-		love.graphics.setColor(255, 255, 255)
 		love.graphics.print("FPS: " .. tostring(love.timer.getFPS()) .. ", entities: " .. #entities, 375, 260)
-
-		-- love.graphics.print(controller:debug(1), 40, 260)
 	end
 
 	controller:reset() -- raz every actions detections

@@ -7,3 +7,6 @@
 [submodule "lib/hump"]
 	path = lib/hump
 	url = git@github.com:vrld/hump.git
+[submodule "lib/lynput"]
+	path = lib/lynput
+	url = https://github.com/Lydzje/lynput.git
