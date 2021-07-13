@@ -27,7 +27,7 @@ WINDOW_HEIGHT = 720
 -- Define the virtual screen size
 SCREEN_WIDTH = 512 -- 32 x 16
 SCREEN_HEIGHT = 288 -- 18 x 16
-aspect.setGame(SCREEN_WIDTH, SCREEN_HEIGHT)
+aspect.setGame(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT)
 
 local world, controller, skyBg, starsBg
 
@@ -75,6 +75,10 @@ function love.keypressed(key)
 	else
 		controller:onKeypressed(key)
 	end
+end
+
+function love.resize(w, h)
+	aspect.setWindow(w, h)
 end
 
 function love.draw()
