@@ -1,7 +1,5 @@
 -- https://github.com/Vovkiv/love_dumb/blob/main/aspect/aspect.lua
 
-local copyBackgroundColor = false
-local gameWidth, gameHeight = 800, 600
 local r, g, b, a = 0, 0, 0, 1
 
 local lovePop, lovePush, loveTranslate, loveScale, loveColor, loveRectangle, loveBackground, loveWidth, loveHeight, abs =
@@ -16,12 +14,18 @@ local lovePop, lovePush, loveTranslate, loveScale, loveColor, loveRectangle, lov
 	love.graphics.getHeight,
 	math.abs
 
+local windowWidth, windowHeight, windowAspect
+local gameWidth, gameHeight, gameAspect = 800, 600, 800 / 600
 local x1, y1, w1, h1, x2, y2, w2, h2
-local windowWidth, windowHeight
 local xoff, yoff
-local gameAspect, windowAspect
 local scale
 local a_
+
+local function setWindow(w, h)
+	windowWidth, windowHeight, windowAspect = w, h, w / h
+end
+
+setWindow(loveWidth(), loveHeight())
 
 local module = {
 	setColor = function(r1, g1, b1, a1)
@@ -31,8 +35,11 @@ local module = {
 		return r, g, b, a
 	end,
 
-	setGame = function(w, h)
+	setGame = function(w, h, wW, wH)
 		gameWidth, gameHeight = w, h
+		if wW then
+			setWindow(wW, wH)
+		end
 	end,
 	getGame = function()
 		return gameWidth, gameHeight
@@ -70,9 +77,7 @@ local module = {
 	end,
 
 	update = function()
-		windowWidth, windowHeight = loveWidth(), loveHeight()
 		gameAspect = gameWidth / gameHeight
-		windowAspect = windowWidth / windowHeight
 		if gameAspect > windowAspect then
 			scale = windowWidth / gameWidth
 			a_ = abs((gameHeight * scale - windowHeight) / 2)
@@ -108,5 +113,7 @@ local module = {
 		lovePop()
 	end,
 }
+
+module.setWindow = setWindow
 
 return module
