@@ -16,10 +16,12 @@ local anim8 = require("lib.anim8.anim8")
 Player = Class({})
 
 local GAMEPAD_MAPPING = {
-	_dpup = "up", -- when the button is pressed
+	-- when the button is down
+	_dpup = "up",
 	_dpdown = "down",
 	_dpleft = "left",
 	_dpright = "right",
+	-- when the button is pressed
 	b = "fire",
 	a = "dropBomb",
 	x = "launchMissile",
@@ -39,7 +41,7 @@ Player.PLAYER2_MAPPINGS = {
 	gamepad = GAMEPAD_MAPPING,
 }
 
-function Player:init(world, playerIndex, x, y)
+function Player:init(world, playerIndex, x, y, speed)
 	local image = love.graphics.newImage("assets/img/starship-spritesheet-32x32.png")
 	local animSpriteSheet = anim8.newGrid(32, 32, image:getWidth(), image:getHeight())
 
@@ -48,10 +50,13 @@ function Player:init(world, playerIndex, x, y)
 
 	-- position
 	self.x, self.y = x, y
-	-- velocity
+	-- current velocity
 	self.vx, self.vy = 0, 0
 	-- acceleration
 	self.ax, self.ay = 0, 0
+
+	-- default speed
+	self.speed = speed or 70
 
 	self.states = {
 		still = anim8.newAnimation(animSpriteSheet(1, 1, 6, 1), 0.6),
