@@ -9,6 +9,10 @@
 ]]
 Class = require("lib.hump.class")
 
+local unpack = unpack or table.unpack
+local isKeyDown = love.keyboard.isDown
+local PLAYER1, PLAYER2 = unpack(love.joystick.getJoysticks())
+
 -- Load some custom Gamepad mappings
 love.joystick.loadGamepadMappings(
 	"0500000049190000020400001b010000,GamepadPlus,a:b0,b:b1,x:b3,y:b4,back:b10,start:b11,leftstick:b13,rightstick:b14,leftshoulder:b6,rightshoulder:b7,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b8,righttrigger:b9,platform:Linux,"
@@ -21,9 +25,6 @@ love.joystick.loadGamepadMappings(
 )
 
 Controller = Class({})
-local unpack = unpack or table.unpack
-local isKeyDown = love.keyboard.isDown
-local PLAYER1, PLAYER2 = unpack(love.joystick.getJoysticks())
 
 function Controller:init(player1_definitions, player2_definitions)
 	if PLAYER1 then
@@ -52,11 +53,18 @@ function Controller:init(player1_definitions, player2_definitions)
 	function love.gamepadpressed(joystick, button)
 		self:onGamepadpressed(joystick, button)
 	end
-	-- function love.gamepadreleased()
+	-- function love.gamepadreleased(joystick, button)
+	-- self:onGamepadpressed(joystick, button)
 	-- end
 end
 
 function Controller:reset()
+	-- for i = 1, 2 do
+	-- 	local actions = self.playerActions[i]
+	-- 	for j = 1, #actions do
+	-- 		actions[j] = nil
+	-- 	end
+	-- end
 	self.playerActions = { {}, {} } -- player1 table, player 2 table
 end
 
@@ -89,25 +97,39 @@ end
 -- Call this inside love.gamepadpressed
 function Controller:onGamepadpressed(joystick, button)
 	local def1, def2 = unpack(self.actions_definitions.gamepad)
+	local buttonPressed = "_" .. button -- This action is true as long as the button is pressed
 
 	-- Check for gamepad mappings on player 1
 	if joystick == PLAYER1 then
 		if def1[button] then
-			print("DOWN #1", button, "mapped to", def1[button] or "nil")
+			print("DOWN #1", button, "mapped to", def1[button])
 			table.insert(self.playerActions[1], def1[button])
-		elseif def1["_" .. button] then
-			self.playerActions[1][def1["_" .. button]] = true
+		elseif def1[buttonPressed] then
+			print("DOWN #1", button, "mapped to", def1[buttonPressed])
+			self.playerActions[1][def1[buttonPressed]] = true
 		end
 	end
 
 	-- Check for gamepad mappings on player 2
 	if joystick == PLAYER2 and def2[button] then
 		if def2[button] then
-			print("DOWN #2", button, "mapped to", def2[button] or "nil")
+			print("DOWN #2", button, "mapped to", def2[button])
 			table.insert(self.playerActions[2], def2[button])
-		elseif def2["_" .. button] then
-			self.playerActions[2][def2["_" .. button]] = true
+		elseif def2[buttonPressed] then
+			print("DOWN #1", button, "mapped to", def1[buttonPressed])
+			self.playerActions[2][def2[buttonPressed]] = true
 		end
+	end
+end
+
+function Controller:onGamepadreleased(joystick, button)
+	local def1, def2 = unpack(self.actions_definitions.gamepad)
+	local buttonPressed = "_" .. button
+
+	if joystick == PLAYER1 and def1[buttonPressed] then
+		self.playerActions[1][def1[buttonPressed]] = false
+	elseif joystick == PLAYER2 and def2[buttonPressed] then
+		self.playerActions[2][def2[buttonPressed]] = false
 	end
 end
 
