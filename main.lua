@@ -16,7 +16,7 @@ local Controller = require("lib.Controller")
 
 local ScrollingBackground = require("entities.ScrollingBackground")
 local Player = require("entities.Player")
-local Fuel = require("entities.Fuel")
+local Ground = require("entities.Ground")
 
 DEBUG = true
 
@@ -29,7 +29,12 @@ SCREEN_WIDTH = 512 -- 32 x 16
 SCREEN_HEIGHT = 288 -- 18 x 16
 aspect.setGame(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT)
 
-local world, controller, skyBg, starsBg
+local world, controller, skyBg, starsBg, ground
+
+-- Game difficulty is indexed on speed
+BABY_SPEED = 40
+DEFAULT_SPEED = 70
+HARDCORE_SPEED = 100
 
 function love.load()
 	love.window.setTitle("Scramble")
@@ -47,11 +52,12 @@ function love.load()
 	-- Define entities
 	skyBg = ScrollingBackground("background-galaxy", -10, SCREEN_WIDTH, SCREEN_HEIGHT)
 	starsBg = ScrollingBackground("background-stars", -20, SCREEN_WIDTH, SCREEN_HEIGHT)
+	ground = Ground("ground-tileset-16x16", "red", DEFAULT_SPEED, Ground.levels[1], SCREEN_HEIGHT / 4)
 
 	-- Define the players positions
-	Player(world, 1, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4 - 20) -- GET READY PLAYER #1
+	Player(world, 1, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4 - 20, DEFAULT_SPEED) -- GET READY PLAYER #1
 	if controller:hasGamepad(2) then
-		Player(world, 2, SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4 - 20) -- GET READY PLAYER #2
+		Player(world, 2, SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 4 - 20, DEFAULT_SPEED) -- GET READY PLAYER #2
 	end
 end
 
@@ -61,6 +67,7 @@ function love.update(dt)
 	-- static entities
 	skyBg:update(dt)
 	starsBg:update(dt)
+	ground:update(dt)
 
 	-- dynamic entities that are registered on the world
 	local entities = world:getItems()
@@ -86,6 +93,7 @@ function love.draw()
 
 	skyBg:draw()
 	starsBg:draw()
+	ground:draw()
 
 	local entities = world:getItems()
 	for i = 1, #entities do
