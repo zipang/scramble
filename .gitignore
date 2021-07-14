@@ -1,3 +1,7 @@
+# Various test folders
+tests/
+_drafts/
+
 # Compiled Lua sources
 luac.out
 
