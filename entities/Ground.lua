@@ -50,9 +50,9 @@ local buildMap = function(initialHeight, level, tileset)
 	for i = 1, #level do
 		local c = level:sub(i, i)
 		x = (i - 1) * 16
-		if previousTile.symbol == "\\" and c == "\\" then
+		if previousTile.symbol == "\\" and (c == "\\" or c == "=") then
 			y = y + 16
-		elseif previousTile.symbol == "/" and c == "/" then
+		elseif (previousTile.symbol == "/" or previousTile.symbol == "=") and c == "/" then
 			y = y - 16
 		end
 
