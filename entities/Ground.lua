@@ -8,6 +8,7 @@
 ]]
 Class = require("lib.hump.class")
 local anim8 = require("lib.anim8.anim8")
+local Fuel = require("entities.Fuel")
 
 -- Shortcuts
 local draw, setColor, rectangle = love.graphics.draw, love.graphics.setColor, love.graphics.rectangle
@@ -20,7 +21,7 @@ local cols = 32 + 1 -- SCREEN_WIDTH / 16 + 1
 Ground = Class({})
 
 Ground.levels = {
-	"_____________//////=/==\\_\\\\F^^^_^^F/=/=\\F^^_^^///==\\\\__/=\\\\\\_____//=/=\\\\\\_///////==\\\\____\\\\_\\_/===/",
+	"_____________//////=/==\\_/\\\\F^^^_^^F/=/=\\F^^_^^///==\\\\__/=\\\\\\_____//=/=\\\\\\_///////==\\\\____/\\\\_\\_/===/\\\\\\\\____",
 }
 
 --[[ Return a matrix of available tiles :
@@ -47,20 +48,28 @@ local buildMap = function(initialHeight, level, tileset)
 	local tiles = {}
 	local x = 0
 	local y = (SCREEN_HEIGHT - initialHeight) or 200
-	local previousTile = { x = x, y = y, symbol = "_" }
+	local previousSymbol = "_"
 
 	-- Loop over the letters from the level
 	for i = 1, #level do
 		local c = level:sub(i, i)
 		x = (i - 1) * 16
-		if previousTile.symbol == "\\" and (c == "\\" or c == "=") then
+
+		if previousSymbol == "\\" and (c == "\\" or c == "=") then
 			y = y + 16
-		elseif (previousTile.symbol == "/" or previousTile.symbol == "=") and c == "/" then
+		elseif (previousSymbol == "/" or previousSymbol == "=") and c == "/" then
 			y = y - 16
 		end
 
-		previousTile = { x = x, y = y, symbol = c, tile = findTile(c, tileset) }
-		table.insert(tiles, previousTile)
+		local tile = { x = x, y = y, symbol = c, tile = findTile(c, tileset) }
+
+		if c == "F" then
+			tile.hasFuel = true
+			tile.symbol = "_"
+		end
+
+		table.insert(tiles, tile)
+		previousSymbol = tile.symbol
 	end
 
 	return tiles
