@@ -8,7 +8,7 @@
 Class = require("lib.hump.class")
 
 local image = love.graphics.newImage("assets/img/bomb.png")
-local gravity = 60
+local gravity = 100
 
 Bomb = Class({})
 
