@@ -9,6 +9,9 @@
 Class = require("lib.hump.class")
 local anim8 = require("lib.anim8.anim8")
 
+-- Shortcuts
+local draw, setColor, rectangle = love.graphics.draw, love.graphics.setColor, love.graphics.rectangle
+
 local image
 
 -- The ground is divided in 16x16 tiles
@@ -17,7 +20,7 @@ local cols = 32 + 1 -- SCREEN_WIDTH / 16 + 1
 Ground = Class({})
 
 Ground.levels = {
-	"_____________//////=/==\\_\\\\F^^^_^^F/=/=\\F^^_^^///==\\\\__/=\\\\\\_____//=/=\\\\\\_////////////",
+	"_____________//////=/==\\_\\\\F^^^_^^F/=/=\\F^^_^^///==\\\\__/=\\\\\\_____//=/=\\\\\\_///////==\\\\____\\\\_\\_/===/",
 }
 
 --[[ Return a matrix of available tiles :
@@ -84,19 +87,18 @@ function Ground:update(dt)
 end
 
 function Ground:draw()
-	-- love.graphics.setColor(1, 0, 0)
 	-- Find the first tile to draw
 	local start = math.floor(-self.x / 16)
 
 	for i = 1, cols do
 		local tile = self.tiles[start + i]
 		if tile then
-			love.graphics.draw(self.image, tile.tile, self.x + tile.x, tile.y)
-			-- love.graphics.rectangle("fill", self.x + tile.x, tile.y + 16, 16, 200)
+			draw(self.image, tile.tile, self.x + tile.x, tile.y)
+			setColor(1, 67 / 255, 0)
+			rectangle("fill", self.x + tile.x, tile.y + 16, 16, 200)
+			setColor(1, 1, 1)
 		end
 	end
-
-	-- love.graphics.setColor(1, 1, 1)
 end
 
 return Ground
