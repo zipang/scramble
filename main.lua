@@ -19,6 +19,7 @@ local Player = require("entities.Player")
 local Ground = require("entities.Ground")
 
 DEBUG = true
+PAUSE = false
 
 -- Setup the initial window size
 WINDOW_WIDTH = 1280
@@ -62,6 +63,10 @@ function love.load()
 end
 
 function love.update(dt)
+	if PAUSE then
+		return
+	end
+
 	aspect.update()
 
 	-- static entities
@@ -79,6 +84,8 @@ end
 function love.keypressed(key)
 	if key == "escape" then
 		love.event.quit()
+	elseif ke == "space" then
+		PAUSE = not PAUSE
 	else
 		controller:onKeypressed(key)
 	end
