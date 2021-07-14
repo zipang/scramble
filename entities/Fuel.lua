@@ -14,22 +14,36 @@ local animSpriteSheet = anim8.newGrid(16, 16, image:getWidth(), image:getHeight(
 
 Fuel = Class({})
 
-function Fuel:init(x, y)
+function Fuel:init(world, x, y, vx)
 	-- position
 	self.x, self.y = x or 0, y or 0
+	-- velocity
+	self.vx = vx or 0
 
 	self.states = {
-		still = anim8.newAnimation(animSpriteSheet(1, 1), 1),
+		still = anim8.newAnimation(animSpriteSheet(1, 1), 100),
 		explode = anim8.newAnimation(animSpriteSheet("2-7", 1), 0.2, "pauseAtEnd"),
 	}
 	self.state = "still"
+
+	-- register ourself to the world (bump)
+	world:add(self, self:getCollisionRectangle())
+	self.world = world
 end
 
 function Fuel:getCollisionRectangle()
 	return self.x + 2, self.y + 5, 13, 11
 end
 
+function Fuel:move(x, y) end
+
+function Fuel:destroy()
+	self.world:remove(self)
+end
+
 function Fuel:update(dt)
+	self.x = self.x + self.vx
+	self.world:move(self, self.x, self.y)
 	self.states[self.state]:update(dt)
 end
 
