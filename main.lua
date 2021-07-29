@@ -90,7 +90,7 @@ end
 function love.keypressed(key)
 	if key == "escape" then
 		love.event.quit()
-	elseif ke == "space" then
+	elseif key == "space" then
 		PAUSE = not PAUSE
 	else
 		controller:onKeypressed(key)
@@ -113,7 +113,9 @@ function love.draw()
 		entities[i]:draw()
 	end
 
-	if DEBUG then
+	if PAUSE then
+		love.graphics.print("PAUSED", 375, 260)
+	elseif DEBUG then
 		love.graphics.print("FPS: " .. tostring(love.timer.getFPS()) .. ", entities: " .. #entities, 375, 260)
 	end
 
