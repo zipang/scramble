@@ -32,6 +32,9 @@ aspect.setGame(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT)
 
 local world, controller, skyBg, starsBg, ground
 
+-- Keep framerate at 60fps  https://love2d.org/wiki/love.timer.sleep
+local min_dt = 1 / 60, next_time
+
 -- Game difficulty is indexed on speed
 BABY_SPEED = 40
 DEFAULT_SPEED = 70
@@ -42,6 +45,8 @@ function love.load()
 	love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, { resizable = true })
 	-- Do not apply blur on resizing
 	love.graphics.setDefaultFilter("nearest", "nearest")
+
+	next_time = love.timer.getTime()
 
 	-- Define the world
 	world = bump.newWorld(16)
@@ -67,6 +72,7 @@ function love.update(dt)
 		return
 	end
 
+	next_time = next_time + min_dt
 	aspect.update()
 
 	-- static entities
@@ -114,4 +120,12 @@ function love.draw()
 	controller:reset() -- raz every actions detections
 
 	aspect.stop()
+
+	-- Ensure only 60fps
+	local cur_time = love.timer.getTime()
+	if next_time <= cur_time then
+		next_time = cur_time
+		return
+	end
+	love.timer.sleep(next_time - cur_time)
 end
